@@ -17,17 +17,11 @@
   /* ===== 헤더 (로고는 logo.png 파일을 올리면 표시됩니다) ===== */
   header {
     background: #fff; border-bottom: 1px solid var(--line);
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex; align-items: center;
     padding: 14px 18px; position: sticky; top: 0; z-index: 10;
   }
   .brand { display: flex; align-items: center; gap: 8px; min-height: 30px; }
   .brand img { height: 30px; width: auto; display: block; }
-  .menu {
-    display: flex; flex-direction: column; align-items: center; gap: 3px;
-    color: #333; font-size: 11px; background: none; border: 0; cursor: pointer;
-  }
-  .menu .bars { display: flex; flex-direction: column; gap: 4px; }
-  .menu .bars span { width: 22px; height: 2px; background: #333; border-radius: 2px; }
 
   /* ===== 본문 ===== */
   main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; }
@@ -59,10 +53,6 @@
     <!-- 공식 로고 파일 logo.png 를 저장소에 올리면 아래 이미지가 표시됩니다. -->
     <img src="logo.png" alt="IBK 기업은행" onerror="this.style.display='none'">
   </div>
-  <button class="menu" type="button" aria-label="전체메뉴">
-    <span class="bars"><span></span><span></span><span></span></span>
-    전체메뉴
-  </button>
 </header>
 
 <main>
@@ -72,7 +62,7 @@
     <p id="desc">앱이 열리지 않으면 아래 버튼을 눌러주세요.</p>
     <a class="btn primary" id="openBtn" href="#">앱 열기</a>
     <a class="btn secondary" id="storeBtn" href="#">앱 설치하기</a>
-    <div class="ver">v5</div>
+    <div class="ver">v6</div>
   </div>
 </main>
 
