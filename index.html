@@ -3,40 +3,78 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>앱 열기</title>
+<title>i-ONE Bank 앱 열기</title>
 <style>
+  :root { --brand: #013c8c; --brand-light: #eaf1fb; --line: #e6e8ec; }
   * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
   body {
-    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; display: flex; flex-direction: column;
     font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-    background: #f5f6f8; color: #222;
+    background: #f5f6f8; color: #1a1a1a;
   }
-  .box { width: 100%; max-width: 360px; padding: 32px 24px; text-align: center; }
-  h1 { font-size: 20px; margin: 0 0 8px; }
-  p { font-size: 14px; color: #666; margin: 0 0 28px; line-height: 1.5; }
-  .btn {
-    display: block; width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 10px;
-    font-size: 16px; font-weight: 600; text-decoration: none; border: 0;
+
+  /* ===== 헤더 (로고는 logo.png 파일을 올리면 표시됩니다) ===== */
+  header {
+    background: #fff; border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px; position: sticky; top: 0; z-index: 10;
   }
-  .primary { background: #1f4fd8; color: #fff; }
-  .secondary { background: #fff; color: #333; border: 1px solid #ddd; }
+  .brand { display: flex; align-items: center; gap: 8px; min-height: 30px; }
+  .brand img { height: 30px; width: auto; display: block; }
+  .menu {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    color: #333; font-size: 11px; background: none; border: 0; cursor: pointer;
+  }
+  .menu .bars { display: flex; flex-direction: column; gap: 4px; }
+  .menu .bars span { width: 22px; height: 2px; background: #333; border-radius: 2px; }
+
+  /* ===== 본문 ===== */
+  main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .card {
+    width: 100%; max-width: 360px; background: #fff; border: 1px solid var(--line);
+    border-radius: 16px; padding: 36px 24px 28px; text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,.04);
+  }
   .spinner {
-    width: 28px; height: 28px; margin: 0 auto 20px; border: 3px solid #ddd; border-top-color: #1f4fd8;
-    border-radius: 50%; animation: spin .8s linear infinite;
+    width: 30px; height: 30px; margin: 0 auto 22px; border: 3px solid var(--brand-light);
+    border-top-color: var(--brand); border-radius: 50%; animation: spin .8s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
+  h1 { font-size: 19px; margin: 0 0 8px; letter-spacing: -.3px; }
+  p { font-size: 14px; color: #6b7280; margin: 0 0 26px; line-height: 1.55; }
+  .btn {
+    display: block; width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 11px;
+    font-size: 16px; font-weight: 600; text-decoration: none; border: 0; cursor: pointer;
+  }
+  .primary { background: var(--brand); color: #fff; }
+  .secondary { background: #fff; color: #374151; border: 1px solid #d7dbe0; }
+  .ver { font-size: 11px; color: #c3c7cc; margin-top: 18px; }
   .hidden { display: none; }
 </style>
 </head>
 <body>
-<div class="box">
-  <div class="spinner" id="spinner"></div>
-  <h1 id="title">i-ONE Bank 앱을 여는 중…</h1>
-  <p id="desc">앱이 열리지 않으면 아래 버튼을 눌러주세요.</p>
-  <a class="btn primary" id="openBtn" href="#">앱 열기</a>
-  <a class="btn secondary" id="storeBtn" href="#">앱 설치하기</a>
-  <div style="font-size:11px;color:#bbb;margin-top:16px">v4</div>
-</div>
+<header>
+  <div class="brand">
+    <!-- 공식 로고 파일 logo.png 를 저장소에 올리면 아래 이미지가 표시됩니다. -->
+    <img src="logo.png" alt="IBK 기업은행" onerror="this.style.display='none'">
+  </div>
+  <button class="menu" type="button" aria-label="전체메뉴">
+    <span class="bars"><span></span><span></span><span></span></span>
+    전체메뉴
+  </button>
+</header>
+
+<main>
+  <div class="card">
+    <div class="spinner" id="spinner"></div>
+    <h1 id="title">i-ONE Bank 앱을 여는 중…</h1>
+    <p id="desc">앱이 열리지 않으면 아래 버튼을 눌러주세요.</p>
+    <a class="btn primary" id="openBtn" href="#">앱 열기</a>
+    <a class="btn secondary" id="storeBtn" href="#">앱 설치하기</a>
+    <div class="ver">v5</div>
+  </div>
+</main>
 
 <script>
 (function () {
@@ -46,7 +84,7 @@
   var ANDROID_PACKAGE = "com.ibk.android.ionebank";
   var PLAY_URL = "https://play.google.com/store/apps/details?id=" + ANDROID_PACKAGE;
   var APPSTORE_URL = "https://apps.apple.com/kr/app/id1460543865";
-  var FALLBACK_DELAY = 1800; // ms (iOS)
+  var FALLBACK_DELAY = 1800;         // ms (iOS)
   var ANDROID_FALLBACK_DELAY = 2500; // ms
 
   // ?c=xxx 로 command 변경 가능 (영문/숫자/_ 만 허용)
@@ -58,24 +96,19 @@
   var isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
   var schemeUrl = SCHEME + "://?command=" + command;
-  // Android: ionebank 스킴을 처리하는 앱이 없을 때만 크롬/삼성인터넷이 fallback URL(플레이스토어)로 이동
-  // package를 지정하지 않음: 지정한 패키지명이 설치된 앱(개편 후 신규 앱 등)과 다르면 앱이 있어도 스토어로 가버림
+  // 버튼 터치용: fallback 포함 → 앱 없으면 크롬이 플레이스토어로 보냄
   var intentUrl = "intent://?command=" + command +
     "#Intent;scheme=" + SCHEME +
     ";S.browser_fallback_url=" + encodeURIComponent(PLAY_URL) +
     ";end";
-  // 자동 시도용: fallback 없음.
-  // 크롬은 사용자 터치 없이 JS로 연 intent는 앱을 실행하지 않고 fallback URL로 보내버리므로,
-  // 자동 시도에 fallback을 넣으면 앱이 있어도 플레이스토어가 열림. 실패하면 이 페이지에 그대로 남음.
+  // 자동 시도용: fallback 없음 (크롬이 제스처 없는 intent를 막고 fallback으로 보내는 것을 방지)
   var intentUrlNoFallback = "intent://?command=" + command +
     "#Intent;scheme=" + SCHEME + ";end";
 
   var openBtn = document.getElementById("openBtn");
   var storeBtn = document.getElementById("storeBtn");
-  var storeUrl = isIOS ? APPSTORE_URL : PLAY_URL;
-
   openBtn.href = isAndroid ? intentUrl : schemeUrl;
-  storeBtn.href = storeUrl;
+  storeBtn.href = isIOS ? APPSTORE_URL : PLAY_URL;
 
   if (!isAndroid && !isIOS) {
     // PC 등: 자동 실행하지 않고 안내만
@@ -86,9 +119,8 @@
     storeBtn.textContent = "Google Play";
     storeBtn.href = PLAY_URL;
     var ios = storeBtn.cloneNode(true);
-    ios.textContent = "App Store";
-    ios.href = APPSTORE_URL;
-    storeBtn.parentNode.appendChild(ios);
+    ios.textContent = "App Store"; ios.href = APPSTORE_URL;
+    storeBtn.parentNode.insertBefore(ios, storeBtn.nextSibling);
     return;
   }
 
@@ -97,18 +129,14 @@
   function cancel() { if (timer) { clearTimeout(timer); timer = null; } }
   document.addEventListener("visibilitychange", function () { if (document.hidden) cancel(); });
   window.addEventListener("pagehide", cancel);
-  // blur는 Android에서만 사용 (앱 선택 창이 떠도 스토어로 넘어가지 않게).
-  // iOS는 Safari의 "주소가 유효하지 않음" 알림창에서도 blur가 발생해 스토어 이동이 취소될 수 있어 제외.
-  if (isAndroid) window.addEventListener("blur", cancel);
+  if (isAndroid) window.addEventListener("blur", cancel); // 앱 선택 창이 떠도 스토어로 가지 않게
 
   function tryOpen(byUser) {
     cancel();
     if (isAndroid) {
       if (byUser) {
-        // 버튼 터치(사용자 제스처): fallback 포함 intent → 앱 없으면 크롬이 플레이스토어로 보냄
         location.href = intentUrl;
       } else {
-        // 자동 시도: 앱이 열리면 페이지가 숨겨져 타이머 취소, 그대로 남아 있으면 앱이 없는 것으로 보고 스토어로
         timer = setTimeout(function () { location.href = PLAY_URL; }, ANDROID_FALLBACK_DELAY);
         location.href = intentUrlNoFallback;
       }
@@ -118,12 +146,9 @@
     }
   }
 
-  // Android는 a 태그 기본 동작(href=intentUrl)으로 이동시켜 사용자 제스처가 확실히 유지되게 함
   if (!isAndroid) {
     openBtn.addEventListener("click", function (e) { e.preventDefault(); tryOpen(true); });
   }
-
-  // 페이지 열리자마자 자동 시도
   tryOpen(false);
 })();
 </script>
