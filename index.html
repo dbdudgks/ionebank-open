@@ -35,6 +35,7 @@
   <p id="desc">앱이 열리지 않으면 아래 버튼을 눌러주세요.</p>
   <a class="btn primary" id="openBtn" href="#">앱 열기</a>
   <a class="btn secondary" id="storeBtn" href="#">앱 설치하기</a>
+  <div style="font-size:11px;color:#bbb;margin-top:16px">v3</div>
 </div>
 
 <script>
@@ -62,6 +63,11 @@
     "#Intent;scheme=" + SCHEME +
     ";S.browser_fallback_url=" + encodeURIComponent(PLAY_URL) +
     ";end";
+  // 자동 시도용: fallback 없음.
+  // 크롬은 사용자 터치 없이 JS로 연 intent는 앱을 실행하지 않고 fallback URL로 보내버리므로,
+  // 자동 시도에 fallback을 넣으면 앱이 있어도 플레이스토어가 열림. 실패하면 이 페이지에 그대로 남음.
+  var intentUrlNoFallback = "intent://?command=" + command +
+    "#Intent;scheme=" + SCHEME + ";end";
 
   var openBtn = document.getElementById("openBtn");
   var storeBtn = document.getElementById("storeBtn");
@@ -92,20 +98,24 @@
   window.addEventListener("pagehide", cancel);
   // blur는 쓰지 않음: iOS Safari의 "주소가 유효하지 않음" 알림창에서도 blur가 발생해 스토어 이동이 취소될 수 있음
 
-  function tryOpen() {
+  function tryOpen(byUser) {
     cancel();
     if (isAndroid) {
-      location.href = intentUrl; // fallback은 intent가 처리
+      // 버튼 터치(사용자 제스처)일 때만 fallback 포함 intent 사용 → 앱 없으면 플레이스토어
+      location.href = byUser ? intentUrl : intentUrlNoFallback;
     } else {
       timer = setTimeout(function () { location.href = APPSTORE_URL; }, FALLBACK_DELAY);
       location.href = schemeUrl;
     }
   }
 
-  openBtn.addEventListener("click", function (e) { e.preventDefault(); tryOpen(); });
+  // Android는 a 태그 기본 동작(href=intentUrl)으로 이동시켜 사용자 제스처가 확실히 유지되게 함
+  if (!isAndroid) {
+    openBtn.addEventListener("click", function (e) { e.preventDefault(); tryOpen(true); });
+  }
 
   // 페이지 열리자마자 자동 시도
-  tryOpen();
+  tryOpen(false);
 })();
 </script>
 </body>
