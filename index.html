@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>앱 열기</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    background: #f5f6f8; color: #222;
+  }
+  .box { width: 100%; max-width: 360px; padding: 32px 24px; text-align: center; }
+  h1 { font-size: 20px; margin: 0 0 8px; }
+  p { font-size: 14px; color: #666; margin: 0 0 28px; line-height: 1.5; }
+  .btn {
+    display: block; width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 10px;
+    font-size: 16px; font-weight: 600; text-decoration: none; border: 0;
+  }
+  .primary { background: #1f4fd8; color: #fff; }
+  .secondary { background: #fff; color: #333; border: 1px solid #ddd; }
+  .spinner {
+    width: 28px; height: 28px; margin: 0 auto 20px; border: 3px solid #ddd; border-top-color: #1f4fd8;
+    border-radius: 50%; animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="spinner" id="spinner"></div>
+  <h1 id="title">i-ONE Bank 앱을 여는 중…</h1>
+  <p id="desc">앱이 열리지 않으면 아래 버튼을 눌러주세요.</p>
+  <a class="btn primary" id="openBtn" href="#">앱 열기</a>
+  <a class="btn secondary" id="storeBtn" href="#">앱 설치하기</a>
+</div>
+
+<script>
+(function () {
+  // ---- 설정 ----
+  var SCHEME = "ionebank";
+  var DEFAULT_COMMAND = "dig_cbd_000000_1";
+  var ANDROID_PACKAGE = "com.ibk.android.ionebank";
+  var PLAY_URL = "https://play.google.com/store/apps/details?id=" + ANDROID_PACKAGE;
+  var APPSTORE_URL = "https://apps.apple.com/kr/app/id1460543865";
+  var FALLBACK_DELAY = 1800; // ms
+
+  // ?c=xxx 로 command 변경 가능 (영문/숫자/_ 만 허용)
+  var q = new URLSearchParams(location.search).get("c");
+  var command = (q && /^[A-Za-z0-9_]+$/.test(q)) ? q : DEFAULT_COMMAND;
+
+  var ua = navigator.userAgent || "";
+  var isAndroid = /Android/i.test(ua);
+  var isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+  var schemeUrl = SCHEME + "://?command=" + command;
+  // Android: 앱이 없으면 크롬/삼성인터넷이 fallback URL(플레이스토어)로 이동
+  var intentUrl = "intent://?command=" + command +
+    "#Intent;scheme=" + SCHEME +
+    ";package=" + ANDROID_PACKAGE +
+    ";S.browser_fallback_url=" + encodeURIComponent(PLAY_URL) +
+    ";end";
+
+  var openBtn = document.getElementById("openBtn");
+  var storeBtn = document.getElementById("storeBtn");
+  var storeUrl = isIOS ? APPSTORE_URL : PLAY_URL;
+
+  openBtn.href = isAndroid ? intentUrl : schemeUrl;
+  storeBtn.href = storeUrl;
+
+  if (!isAndroid && !isIOS) {
+    // PC 등: 자동 실행하지 않고 안내만
+    document.getElementById("spinner").className = "hidden";
+    document.getElementById("title").textContent = "휴대폰에서 열어주세요";
+    document.getElementById("desc").textContent = "이 링크는 i-ONE Bank 앱이 설치된 휴대폰에서 동작합니다.";
+    openBtn.className = "hidden";
+    storeBtn.textContent = "Google Play";
+    storeBtn.href = PLAY_URL;
+    var ios = storeBtn.cloneNode(true);
+    ios.textContent = "App Store";
+    ios.href = APPSTORE_URL;
+    storeBtn.parentNode.appendChild(ios);
+    return;
+  }
+
+  // 앱으로 넘어가면 페이지가 숨겨지므로 스토어 이동 취소
+  var timer = null;
+  function cancel() { if (timer) { clearTimeout(timer); timer = null; } }
+  document.addEventListener("visibilitychange", function () { if (document.hidden) cancel(); });
+  window.addEventListener("pagehide", cancel);
+  // blur는 쓰지 않음: iOS Safari의 "주소가 유효하지 않음" 알림창에서도 blur가 발생해 스토어 이동이 취소될 수 있음
+
+  function tryOpen() {
+    cancel();
+    if (isAndroid) {
+      location.href = intentUrl; // fallback은 intent가 처리
+    } else {
+      timer = setTimeout(function () { location.href = APPSTORE_URL; }, FALLBACK_DELAY);
+      location.href = schemeUrl;
+    }
+  }
+
+  openBtn.addEventListener("click", function (e) { e.preventDefault(); tryOpen(); });
+
+  // 페이지 열리자마자 자동 시도
+  tryOpen();
+})();
+</script>
+</body>
+</html>
