@@ -35,7 +35,7 @@
   <p id="desc">앱이 열리지 않으면 아래 버튼을 눌러주세요.</p>
   <a class="btn primary" id="openBtn" href="#">앱 열기</a>
   <a class="btn secondary" id="storeBtn" href="#">앱 설치하기</a>
-  <div style="font-size:11px;color:#bbb;margin-top:16px">v3</div>
+  <div style="font-size:11px;color:#bbb;margin-top:16px">v4</div>
 </div>
 
 <script>
@@ -46,7 +46,8 @@
   var ANDROID_PACKAGE = "com.ibk.android.ionebank";
   var PLAY_URL = "https://play.google.com/store/apps/details?id=" + ANDROID_PACKAGE;
   var APPSTORE_URL = "https://apps.apple.com/kr/app/id1460543865";
-  var FALLBACK_DELAY = 1800; // ms
+  var FALLBACK_DELAY = 1800; // ms (iOS)
+  var ANDROID_FALLBACK_DELAY = 2500; // ms
 
   // ?c=xxx 로 command 변경 가능 (영문/숫자/_ 만 허용)
   var q = new URLSearchParams(location.search).get("c");
@@ -96,13 +97,21 @@
   function cancel() { if (timer) { clearTimeout(timer); timer = null; } }
   document.addEventListener("visibilitychange", function () { if (document.hidden) cancel(); });
   window.addEventListener("pagehide", cancel);
-  // blur는 쓰지 않음: iOS Safari의 "주소가 유효하지 않음" 알림창에서도 blur가 발생해 스토어 이동이 취소될 수 있음
+  // blur는 Android에서만 사용 (앱 선택 창이 떠도 스토어로 넘어가지 않게).
+  // iOS는 Safari의 "주소가 유효하지 않음" 알림창에서도 blur가 발생해 스토어 이동이 취소될 수 있어 제외.
+  if (isAndroid) window.addEventListener("blur", cancel);
 
   function tryOpen(byUser) {
     cancel();
     if (isAndroid) {
-      // 버튼 터치(사용자 제스처)일 때만 fallback 포함 intent 사용 → 앱 없으면 플레이스토어
-      location.href = byUser ? intentUrl : intentUrlNoFallback;
+      if (byUser) {
+        // 버튼 터치(사용자 제스처): fallback 포함 intent → 앱 없으면 크롬이 플레이스토어로 보냄
+        location.href = intentUrl;
+      } else {
+        // 자동 시도: 앱이 열리면 페이지가 숨겨져 타이머 취소, 그대로 남아 있으면 앱이 없는 것으로 보고 스토어로
+        timer = setTimeout(function () { location.href = PLAY_URL; }, ANDROID_FALLBACK_DELAY);
+        location.href = intentUrlNoFallback;
+      }
     } else {
       timer = setTimeout(function () { location.href = APPSTORE_URL; }, FALLBACK_DELAY);
       location.href = schemeUrl;
